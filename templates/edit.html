@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit Task</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+</head>
+<body class="dashboard">
+    <main class="dashboard-shell edit-task-page">
+        <header class="dashboard-header">
+            <div>
+                <h1>Edit task</h1>
+                <p>Update the details for this task.</p>
+            </div>
+
+            <a class="notification-link" href="{{ url_for('dashboard') }}">
+                Back to dashboard
+            </a>
+        </header>
+
+        <section class="panel composer" aria-labelledby="edit-heading">
+            <h2 id="edit-heading">Task details</h2>
+
+            <form class="composer-form" method="post"
+                  action="{{ url_for('edit_task', task_id=task.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-field field-title">
+                    <label for="title">Task title</label>
+                    <input id="title" type="text" name="title" value="{{ task.title }}">
+                </div>
+
+                <div class="form-field field-date">
+                    <label for="due_date">Due date</label>
+                    {% if task.due_date %}
+                        <input id="due_date" type="date" name="due_date" value="{{ task.due_date }}">
+                    {% endif %}
+                    {% if not task.due_date %}
+                        <input id="due_date" type="date" name="due_date">
+                    {% endif %}
+                </div>
+
+                <div class="form-field field-description">
+                    <label for="description">Description</label>
+                    {% if task.description %}
+                        <input id="description" type="text" name="description" value="{{ task.description }}">
+                    {% endif %}
+                    {% if not task.description %}
+                        <input id="description" type="text" name="description">
+                    {% endif %}
+                </div>
+
+                <div class="form-field field-priority">
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority">
+                        <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+
+                <div class="form-field field-category">
+                    <label for="category">Category</label>
+                    <select id="category" name="category">
+                        <option value="school" {% if task.category == 'school' %}selected{% endif %}>School</option>
+                        <option value="work" {% if task.category == 'work' %}selected{% endif %}>Work</option>
+                        <option value="personal" {% if task.category == 'personal' %}selected{% endif %}>Personal</option>
+                        <option value="" {% if not task.category %}selected{% endif %}>None</option>
+                    </select>
+                </div>
+
+                <div class="edit-actions">
+                    <button type="submit">Save changes</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

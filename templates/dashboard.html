@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+</head>
+<body class="dashboard">
+    <main class="dashboard-shell">
+        <header class="dashboard-header">
+            <div>
+                <h1>Task dashboard</h1>
+                <p>Plan your day and keep track of what’s next.</p>
+            </div>
+
+            <div class="notification-controls">
+                <a class="notification-link" href="{{ url_for('notification_center') }}">
+                    Notifications
+                </a>
+
+                <form method="post" action="{{ url_for('email_notifications') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="email_notifications"
+                            {% if current_user.email_notifications %}checked{% endif %}
+                            onchange="this.form.requestSubmit()"
+                        >
+                        Allow email notifications
+                    </label>
+                </form>
+            </div>
+        </header>
+
+        <section class="panel composer" aria-labelledby="composer-heading">
+            <h2 id="composer-heading">New task</h2>
+
+            <form class="composer-form" method="post" action="{{ url_for('dashboard') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-field field-title">
+                    <label for="task_title">Task title</label>
+                    <input id="task_title" type="text" name="title" placeholder="Add Task">
+                </div>
+
+                <div class="form-field field-date">
+                    <label for="task_due_date">Due date</label>
+                    <input id="task_due_date" type="date" name="due_date">
+                </div>
+
+                <div class="form-field field-description">
+                    <label for="task_description">Description</label>
+                    <input
+                        id="task_description"
+                        type="text"
+                        name="description"
+                        placeholder="Add optional description"
+                    >
+                </div>
+
+                <div class="form-field field-priority">
+                    <label for="task_priority">Priority</label>
+                    <select id="task_priority" name="priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="form-field field-category">
+                    <label for="category">Category</label>
+                    <select id="category" name="category">
+                        <option value="" selected>None</option>
+                        <option value="school">School</option>
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                    </select>
+                </div>
+
+                <button class="add-task" type="submit">Add Task</button>
+            </form>
+        </section>
+
+        <section class="task-section" aria-labelledby="tasks-heading">
+            <h2 id="tasks-heading">Tasks</h2>
+
+            <nav class="task-views" aria-label="Task views">
+                <a href="{{ url_for('dashboard', view='active') }}"
+                   {% if view == 'active' %}aria-current="page"{% endif %}>Active Tasks</a>
+                <a href="{{ url_for('dashboard', view='today') }}"
+                   {% if view == 'today' %}aria-current="page"{% endif %}>Today's Agenda</a>
+                <a href="{{ url_for('dashboard', view='upcoming') }}"
+                   {% if view == 'upcoming' %}aria-current="page"{% endif %}>Upcoming</a>
+                <a href="{{ url_for('dashboard', view='completed') }}"
+                   {% if view == 'completed' %}aria-current="page"{% endif %}>Completed Tasks</a>
+                <a href="{{ url_for('dashboard', view='all') }}"
+                   {% if view == 'all' %}aria-current="page"{% endif %}>All</a>
+
+            </nav>
+
+            <div class="panel filter-panel">
+                <form class="search-form" method="get" action="{{ url_for('dashboard') }}">
+                    <div class="form-field">
+                        <label for="task_search">Search tasks</label>
+                        <input type="hidden" name="view" value="search_tasks">
+
+                        <input id="task_search" value="{{ request.args.get('search', '') }}" type="text" name="search" placeholder="Search" >
+                    </div>
+
+
+                    <div class="form-field">
+                        <label for="filter_priority">Priority</label>
+                        <select id="filter_priority" name="priority">
+                            <option value="all" {% if request.args.get('priority', 'all') == 'all' %}selected{% endif %}>All</option>
+                            <option value="low" {% if request.args.get('priority', 'all') == 'low' %}selected{% endif %}>Low</option>
+                            <option value="medium" {% if request.args.get('priority', 'all') == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="high" {% if request.args.get('priority', 'all') == 'high' %}selected{% endif %}>High</option>
+                        </select>
+                    </div>
+
+
+
+
+
+                    <div class="form-field" draggable="false">
+                        <label for="sort_by">Sort By</label>
+                        <select id="sort_by" name="sort">
+                            <option value="due_date" {% if request.args.get('sort', 'due_date') == 'due_date' %}selected{% endif %}>Date</option>
+                            <option value="priority" {% if request.args.get('sort', 'due_date') == 'priority' %}selected{% endif %}>Priority</option>
+                            <option value="oldest" {% if request.args.get('sort', 'due_date') == 'oldest' %}selected{% endif %}>ID</option>
+                            <option value="manual_order" {% if request.args.get('sort', 'due_date') == 'manual_order' %}selected{% endif %}>Manual Order</option>
+                        </select>
+                    </div>
+
+
+
+
+
+                    <div class="form-field">
+                        <label for="sort_category">Filter By Category</label>
+                        <select id="sort_category" name="sort_category">
+                            <option value="all" {% if request.args.get('sort_category', 'all') == 'all' %}selected{% endif %}>All Categories</option>
+                            <option value="school" {% if request.args.get('sort_category', 'all') == 'school' %}selected{% endif %}>School</option>
+                            <option value="work" {% if request.args.get('sort_category', 'all') == 'work' %}selected{% endif %}>Work</option>
+                            <option value="personal" {% if request.args.get('sort_category', 'all') == 'personal' %}selected{% endif %}>Personal</option>
+                        </select>
+                    </div>
+
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+            <section class="task-section" aria-labelledby="tasks-heading">
+
+
+
+            <div id="task-list">
+                {% for i in tasks %}
+                    <div class="task-card" data-id="{{ i.id }}" draggable="{{ 'true' if view == 'active' else 'false' }}">
+                        <div class="task-header">
+                            <div class="task-main">
+                                {% if not i.is_complete %}
+                                    <form method="post" action="{{ url_for('complete', task_id=i.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input
+                                            type="checkbox"
+                                            aria-label="Mark {{ i.title }} complete"
+                                            onchange="this.form.requestSubmit()"
+                                        >
+                                    </form>
+                                {% endif %}
+
+                                <span class="task-title">{{ i.title }}</span>
+
+                                {% if i.due_date and i.due_date < today and not i.is_complete %}
+                                    <span class="overdue">Overdue</span>
+                                {% endif %}
+                            </div>
+                            {% if not i.is_complete %}
+                                <details class="task-menu">
+                                    <summary aria-label="Task options"></summary>
+
+                                    <div class="task-menu-panel">
+                                        <a href="{{ url_for('edit_task', task_id=i.id) }}">Edit</a>
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for('soft_delete_task', current_id=i.id) }}"
+                                            onsubmit="return confirm('Delete this task?')"
+                                        >
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </details>
+                            {% endif %}
+                        </div>
+
+                        <div class="task-meta">
+                            {% if i.category %}
+                                <span>Category: {{ i.category }}</span>
+                            {% endif %}
+
+                            <span>Priority: {{ i.priority }}</span>
+
+                            {% if i.due_date %}
+                                <span>Date: {{ i.due_date.strftime('%Y-%m-%d') }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if i.description %}
+                            <p class="task-description">Description: {{ i.description }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        {% if view == 'completed' %}
+                            <p>No Completed Tasks</p>
+                        {% elif view == 'active' %}
+                            <p>No Active Tasks</p>
+                        {% elif view == 'today' %}
+                            <p>Nothing for Today</p>
+                        {% elif view == 'upcoming' %}
+                            <p>The future is near...</p>
+                        {% else %}
+                            <p>You have nothing</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <script src="{{ url_for('static', filename='task.js') }}"></script>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+
+    <script>
+        toastr.options.escapeHtml = true;
+
+
+
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            {% if category == 'success' %}
+                toastr.success({{ message | tojson }});
+            {% elif category in ('danger', 'error') %}
+                toastr.error({{ message | tojson }});
+            {% elif category == 'info' %}
+                toastr.info({{ message | tojson }});
+            {% endif %}
+        {% endfor %}
+    </script>
+
+</body>
+</html>

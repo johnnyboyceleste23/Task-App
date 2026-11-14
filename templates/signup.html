@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="home-page signup-page">
+    <main class="home-card">
+        <h1>Sign Up</h1>
+
+        <form class="signup-form" action="{{ url_for('signup') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            {% with messages = get_flashed_messages() %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            {% endwith %}
+
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+
+            <label class="signup-checkbox">
+                <input type="checkbox" name="email">
+                Allow email notifications (Coming soon)
+            </label>
+
+            <button type="submit">Add</button>
+        </form>
+    </main>
+</body>
+</html>

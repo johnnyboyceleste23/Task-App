@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notification Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dashboard">
+    <main class="dashboard-shell">
+        <header class="dashboard-header">
+            <h1>Notification Center</h1>
+        </header>
+
+        <div id="task-list">
+            {% for i in tasks %}
+                {% if i.due_date == today and not i.is_complete %}
+                    <div class="task-card">
+                        <p>{{ i.title }} is due today.</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

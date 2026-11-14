@@ -1,0 +1,688 @@
+:root {
+    --background: #fffffa;
+    --text: #000103;
+    --muted: #515052;
+    --dark: #333138;
+    --accent: #ff312e;
+    --border: #deded8;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    background: var(--background);
+    color: var(--text);
+    font: 15px/1.5 Arial, sans-serif;
+}
+
+input, select, button {
+    font: inherit;
+}
+
+input:not([type="hidden"]):not([type="checkbox"]),
+select {
+    min-height: 42px;
+    max-width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: white;
+    color: var(--text);
+}
+
+input::placeholder {
+    color: var(--muted);
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+button {
+    min-height: 42px;
+    padding: 9px 18px;
+    border: 1px solid var(--dark);
+    border-radius: 7px;
+    background: var(--dark);
+    color: var(--background);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--text);
+}
+
+label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+input[type="checkbox"] {
+    display: block;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--dark);
+    cursor: pointer;
+}
+
+/* Shared page styles */
+body > form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+}
+
+body > form:first-of-type {
+    margin-bottom: 24px;
+    padding: 22px;
+    border-top: 3px solid var(--dark);
+    box-shadow: 0 4px 16px rgb(0 1 3 / 5%);
+}
+
+body > form input[name="title"],
+body > form input[name="description"],
+body > form input[name="search"] {
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+body > form:first-of-type button {
+    margin-left: auto;
+}
+
+body > a {
+    display: inline-block;
+    margin: 8px 6px 22px 0;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--dark);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+body > a:hover {
+    background: var(--dark);
+    color: var(--background);
+}
+
+.flashes {
+    margin: 0 0 20px;
+    padding: 14px 18px 14px 36px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dark);
+    border-radius: 8px;
+    background: white;
+}
+
+body > p {
+    padding: 36px 20px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    text-align: center;
+}
+
+/* Dashboard header */
+body.dashboard {
+    max-width: none;
+    padding: 0;
+    background: #f5f5ef;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.dashboard-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(22px, 5vw, 54px) clamp(16px, 4vw, 36px);
+}
+
+.dashboard-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px 24px;
+    margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: clamp(30px, 4.5vw, 46px);
+    line-height: 1.12;
+    letter-spacing: -0.045em;
+}
+
+.dashboard-header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+}
+
+.notification-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+}
+
+.notification-controls form {
+    margin: 0;
+}
+
+.notification-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.notification-controls input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    flex: none;
+}
+
+.notification-link,
+.task-views a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 7px 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: white;
+    color: var(--dark);
+    font-size: 14px;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.notification-link:hover,
+.task-views a:hover {
+    background: #ecece5;
+}
+
+.task-views a[aria-current="page"] {
+    border-color: var(--dark);
+    background: var(--dark);
+    color: white;
+}
+
+/* Add Task form */
+.panel,
+.task-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: white;
+}
+
+.composer {
+    padding: clamp(15px, 3vw, 23px);
+    border-top: 3px solid var(--dark);
+    box-shadow: 0 4px 16px rgb(0 1 3 / 5%);
+}
+
+.dashboard h2 {
+    margin: 0 0 12px;
+    font-size: 19px;
+    line-height: 1.25;
+}
+
+.composer-form {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: end;
+    gap: 12px;
+}
+
+.dashboard .form-field {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.dashboard .form-field input,
+.dashboard .form-field select {
+    width: 100%;
+    min-width: 0;
+}
+
+.field-title { grid-column: span 8; }
+.field-date { grid-column: span 4; }
+.field-description { grid-column: span 6; }
+
+.field-priority,
+.field-category,
+.add-task {
+    grid-column: span 2;
+}
+
+/* Task views and filter panel */
+.task-section {
+    margin-top: 28px;
+}
+
+.task-views {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 12px;
+}
+
+.filter-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 12px 16px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.filter-panel form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+}
+
+.filter-panel .search-form {
+    flex: 1 1 320px;
+}
+
+.search-form .form-field:first-child {
+    flex: 1 1 120px;
+}
+
+.filter-panel button {
+    padding-inline: 12px;
+    border-color: var(--border);
+    background: #f3f3ee;
+    color: var(--dark);
+}
+
+.filter-panel button:hover {
+    background: #e9e9e2;
+}
+
+/* Task cards */
+#task-list {
+    display: grid;
+    gap: 10px;
+}
+
+.task-card {
+    padding: 15px 18px;
+    box-shadow: 0 2px 7px rgb(0 1 3 / 5%);
+}
+
+.task-header,
+.task-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-header {
+    justify-content: space-between;
+}
+
+.task-main {
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.task-main > form {
+    margin: 0;
+    flex: none;
+}
+
+.task-title {
+    font-size: 17px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.task-meta > span {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #f4f4ef;
+    color: var(--muted);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.task-description {
+    margin: 8px 0 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.overdue {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #fff0ef;
+    color: #a91916;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Three-dot menu */
+.task-menu {
+    position: relative;
+    flex: none;
+}
+
+.task-menu summary {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    color: var(--dark);
+    list-style: none;
+    cursor: pointer;
+}
+
+.task-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.task-menu summary::before {
+    content: "⋮";
+    font-size: 24px;
+    line-height: 1;
+}
+
+.task-menu summary:hover,
+.task-menu[open] summary {
+    background: #f3f3ee;
+}
+
+.task-menu[open] {
+    z-index: 10;
+}
+
+.task-menu-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    width: 145px;
+    padding: 5px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: white;
+    box-shadow: 0 6px 16px rgb(0 1 3 / 12%);
+}
+
+.task-menu-panel form {
+    margin: 0;
+}
+
+.task-menu-panel a,
+.task-menu-panel button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--dark);
+    text-align: left;
+    text-decoration: none;
+}
+
+.task-menu-panel a:hover {
+    background: #f3f3ee;
+}
+
+.task-menu-panel button {
+    color: #a91916;
+}
+
+.task-menu-panel button:hover {
+    background: #fff0ef;
+}
+
+.empty-state {
+    padding: 24px 14px;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    background: var(--background);
+    color: var(--muted);
+    text-align: center;
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+/* Smaller screens */
+@media (max-width: 750px) {
+    .field-title,
+    .field-date,
+    .field-priority,
+    .field-category {
+        grid-column: span 6;
+    }
+
+    .field-description,
+    .add-task {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 650px) {
+    body {
+        padding: 20px 14px;
+    }
+
+    body > form,
+    body > form:first-of-type {
+        padding: 14px;
+    }
+
+    body > form:first-of-type button {
+        margin-left: 0;
+    }
+
+    body > a {
+        margin-bottom: 10px;
+    }
+
+    .filter-panel .search-form {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .field-title,
+    .field-date {
+        grid-column: 1 / -1;
+    }
+}
+.edit-task-page {
+            max-width: 760px;
+        }
+
+        .edit-task-page .field-description {
+            grid-column: 1 / -1;
+        }
+
+        .edit-task-page .field-priority,
+        .edit-task-page .field-category {
+            grid-column: span 6;
+        }
+
+        .edit-task-page .edit-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 420px) {
+            .edit-task-page .edit-actions button {
+                width: 100%;
+            }
+        }
+body.home-page {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    max-width: none;
+    padding: 24px;
+    background: #f5f5ef;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.home-card {
+    width: 100%;
+    max-width: 440px;
+    padding: clamp(24px, 6vw, 48px);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--dark);
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 8px 24px rgb(0 1 3 / 6%);
+    text-align: center;
+}
+
+.home-card h1 {
+    margin: 0 0 24px;
+    font-size: clamp(30px, 6vw, 42px);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+}
+
+.home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.home-actions a {
+    flex: 1 1 110px;
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.home-actions a:hover {
+    background: #f3f3ee;
+}
+
+.home-actions a:first-child {
+    border-color: var(--dark);
+    background: var(--dark);
+    color: white;
+}
+
+.home-actions a:first-child:hover {
+    background: var(--text);
+}
+.signup-page .signup-form {
+    display: grid;
+    gap: 14px;
+    text-align: left;
+}
+
+.signup-page .signup-form input[type="text"],
+.signup-page .signup-form input[type="password"],
+.signup-page .signup-form button {
+    width: 100%;
+}
+
+.signup-page .signup-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    cursor: pointer;
+}
+
+.signup-page .signup-checkbox input {
+    flex: none;
+}
+
+.signup-page .signup-form > p {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f3f3ee;
+    color: var(--muted);
+}
+.login-page .login-form {
+    display: grid;
+    gap: 14px;
+    text-align: left;
+}
+
+.login-page .login-form input:not([type="hidden"]),
+.login-page .login-form button {
+    width: 100%;
+    min-width: 0;
+}
+
+.login-page .login-form > p {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f3f3ee;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+.login-page .login-form {
+    display: grid;
+    gap: 14px;
+    text-align: left;
+}
+
+.login-page .login-form input:not([type="hidden"]),
+.login-page .login-form button {
+    width: 100%;
+    min-width: 0;
+}
+
+.login-page .login-form > p {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f3f3ee;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
