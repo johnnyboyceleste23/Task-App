@@ -15,7 +15,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Blueprint
 from flask_login import current_user
 import threading
-
+from sqlalchemy.exc import IntegrityError
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -40,7 +40,10 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
-    email_notifications = db.Column(db.Boolean, default=False, nullable=False)
+    email = db.Column(db.String(80), unique=True, nullable=True)
+    email_notification = db.Column(db.Boolean, default=False, nullable=True)
+
+
 
 
 class Task(db.Model):
@@ -74,6 +77,7 @@ def signup():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        email = request.form.get('email', '').strip()
 
 
 
@@ -88,13 +92,45 @@ def signup():
             flash('Please enter all fields')
             return redirect(url_for('signup'))
 
+        user = User(
+            username=username,
+            password=generate_password_hash(password),
+            email=email or None,
 
-        user = User(username=username, password=generate_password_hash(password))
+        )
         db.session.add(user)
-        user.email_notifications = "email" in request.form
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("That username or email address is already in use.", "danger")
+            return redirect(url_for("signup"))
         return redirect(url_for('home'))
     return render_template("signup.html")
+
+@app.route('/email_notification', methods=['GET', 'POST'])
+@login_required
+def email_notification():
+    if request.method == 'POST':
+        wants_reminders = "email_notification" in request.form
+        email_submission = request.form.get('email', "").strip()
+
+        if wants_reminders and not current_user.email:
+            if not email_submission:
+                flash("Please enter an email address", "danger")
+                return redirect(url_for('dashboard'))
+            current_user.email = email_submission
+        current_user.email_notification = wants_reminders
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("That email address is already in use.", "danger")
+
+    return redirect(url_for('dashboard'))
+
+
 
 
 
@@ -122,6 +158,7 @@ def dashboard():
     view = request.args.get('view', 'active')
     sort = request.args.get('sort', 'due_date')
     filter_category = request.args.get('sort_category', 'all')
+    print(current_user.email)
     if request.method == 'GET':
         search = request.args.get('search', '')
         priority = request.args.get('priority', '')
@@ -184,6 +221,7 @@ def dashboard():
 
     if view == "completed":
         query = query.filter_by(is_complete=True)
+        print(current_user.email)
     elif view == "today":
         query = query.filter_by(
             is_complete=False,
@@ -332,14 +370,6 @@ def notification_center():
     tasks = Task.query.filter_by(user_id=current_user.id, is_deleted=False, is_complete=False).all()
 
     return render_template('notification.html', user=current_user, tasks=tasks, today=calendar_date.today(), due_date=Task.due_date)
-@app.route('/email_notifications', methods=['POST'])
-@login_required
-def email_notifications():
-    current_user.email_notifications = "email_notifications" in request.form
-
-    db.session.commit()
-    print(current_user.email_notifications)
-    return redirect(url_for('dashboard'))
 
 def my_background_task():
     with app.app_context():
@@ -350,7 +380,7 @@ def my_background_task():
         for task in tasks:
             user = db.session.get(User, task.user_id)
 
-            if user is not None and user.email_notifications:
+            if user is not None and user.email:
                 print(f"Would send a reminder to {user.username} for {task.title}")
 
 

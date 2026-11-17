@@ -19,21 +19,32 @@
                 <a class="notification-link" href="{{ url_for('notification_center') }}">
                     Notifications
                 </a>
-
-                <form method="post" action="{{ url_for('email_notifications') }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="email_notifications"
-                            {% if current_user.email_notifications %}checked{% endif %}
-                            onchange="this.form.requestSubmit()"
-                        >
-                        Allow email notifications
-                    </label>
-                </form>
             </div>
+
+
         </header>
+        <form method="post" action="{{ url_for('email_notification') }}" class="reminder-settings">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="email_notification" class="reminder-toggle">
+                <input type="checkbox" id="email_notification" name="email_notification" {% if current_user.email_notification %}checked{% endif %}>
+                Send me email notifications
+
+            </label>
+
+            {% if not current_user.email %}
+                <div id="email_submission">
+                    <label for="email">Email: </label>
+                    <input type="email" id="emailInput" name="email">
+                    <small>Add an email address to receive reminders.</small>
+                </div>
+
+
+            {% endif %}
+            <button type="submit">Save preferences</button>
+
+        </form>
+
+
 
         <section class="panel composer" aria-labelledby="composer-heading">
             <h2 id="composer-heading">New task</h2>

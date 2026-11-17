@@ -73,6 +73,22 @@ fetch('/tasks/reorder', {
 
 })
 
+const checkBox = document.getElementById("email_notification");
+const emailInput = document.getElementById("email_submission");
+const email = document.getElementById("emailInput")
+
+if (checkBox && emailInput && email) {
+    function addEmail() {
+
+        const checked = checkBox.checked;
+
+        emailInput.hidden = !checked;
+        email.disabled = !checked;
+        email.required = checked;
+    }
+    checkBox.addEventListener("change", addEmail);
+    addEmail();
+}
 
 
 

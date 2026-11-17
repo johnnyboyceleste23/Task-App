@@ -686,3 +686,84 @@ body.home-page {
     color: var(--muted);
     overflow-wrap: anywhere;
 }
+.email-signup {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5); /* Dim background */
+        }
+
+        /* The actual small page/box inside the popup */
+        .email-signup-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px; /* Small width */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: black;
+        }
+.dashboard .reminder-settings {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border: 1px solid #deded8;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.dashboard .reminder-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.dashboard .reminder-settings #email_submission:not([hidden]) {
+    display: grid;
+    flex-basis: 100%;
+    gap: 6px;
+}
+
+.dashboard .reminder-settings #email_submission[hidden] {
+    display: none;
+}
+
+.dashboard .reminder-settings #emailInput {
+    width: 100%;
+    max-width: 360px;
+}
+
+.dashboard .reminder-settings small {
+    color: #515052;
+}
+
+.dashboard .reminder-settings button {
+    margin-inline-start: auto;
+}
+
+@media (max-width: 540px) {
+    .dashboard .reminder-settings button {
+        width: 100%;
+        margin-inline-start: 0;
+    }
+}
