@@ -16,6 +16,11 @@ from flask import Blueprint
 from flask_login import current_user
 import threading
 from sqlalchemy.exc import IntegrityError
+import os
+import resend
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from dotenv import load_dotenv
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -32,9 +37,10 @@ toastr = Toastr(app)
 
 app.config["TOASTR_TIMEOUT"] = 3000
 app.config["TOASTR_EXTENDED_TIMEOUT"] = 1000
-# Progress bar showing the countdown timer
-app.config["TOASTR_PROGRESS_BAR"] = True
 
+app.config["TOASTR_PROGRESS_BAR"] = True
+load_dotenv()
+resend.api_key = os.environ.get("RESEND_API_KEY")
 db = SQLAlchemy(app)
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,6 +48,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(80), unique=True, nullable=True)
     email_notification = db.Column(db.Boolean, default=False, nullable=True)
+    last_reminder = db.Column(db.DateTime, nullable=True)
 
 
 
@@ -341,7 +348,7 @@ def reorder_tasks():
 
     data = request.get_json()
 
-    order_ids = data.get('ordered_ids') if isinstance(data, dict) else None#These are the ones the browser sent
+    order_ids = data.get('ordered_ids') if isinstance(data, dict) else None
 
     if not isinstance(order_ids, list):
         return {"error": "Expected a list of task IDs."}, 400
@@ -351,7 +358,7 @@ def reorder_tasks():
             return {"error": "Each task ID must be an integer."}, 400
 
         active_task = Task.query.filter_by(user_id=current_user.id, is_complete=False, is_deleted=False).all()
-        active_ids = [task.id for task in active_task]#These are the ones from the database
+        active_ids = [task.id for task in active_task]
 
         if len(order_ids) != len(active_ids) or set(order_ids) != set(active_ids):
             return {"error": "Your task list changed. Refresh and try again."}, 409
@@ -364,6 +371,8 @@ def reorder_tasks():
     return {"ok": True}
 
 
+
+
 @app.route('/notification_center', methods=['GET'])
 @login_required
 def notification_center():
@@ -373,16 +382,43 @@ def notification_center():
 
 def my_background_task():
     with app.app_context():
+        today = datetime.now(ZoneInfo("America/New_York")).date()
+        users = User.query.filter_by(email_notification=True).all()
 
-        today = calendar_date.today()
-        tasks = Task.query.filter_by(is_deleted=False, is_complete=False, due_date=today).all()
+        for user in users:
+            if not user.email or user.last_reminder == today:
+                continue
 
-        for task in tasks:
-            user = db.session.get(User, task.user_id)
+            due_tasks = Task.query.filter_by(
+                user_id=user.id,
+                is_deleted=False,
+                is_complete=False,
+                due_date=today
+            ).all()
 
-            if user is not None and user.email:
-                print(f"Would send a reminder to {user.username} for {task.title}")
 
+            if user.last_reminder == today:
+                continue
+            try:
+                resend.Emails.send({
+                    "from": "Task App <reminders@mail.johnnyhceleste.com>",
+                    "to": [user.email],
+                    "subject": "Your tasks due today",
+                    "html": render_template(
+                        "email_tasks.html",
+                        user=user,
+                        due_tasks=due_tasks
+                    ),
+                })
+                user.last_reminder = today
+                db.session.commit()
+                print(f"Reminder submitted for user {user.id}")
+
+            except Exception:
+                db.session.rollback()
+                app.logger.exception(
+                    "Reminder failed for user %s", user.id
+                )
 
 
 if __name__ == '__main__':
@@ -391,8 +427,13 @@ if __name__ == '__main__':
         print("create_all ran. Database file:", db.engine.url.database)
 
 
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(my_background_task, trigger="interval", seconds=10)
+    scheduler = BackgroundScheduler(timezone="America/New_York")
+    scheduler.add_job(
+        my_background_task,
+        trigger="cron",
+        hour=8,
+        minute=0
+    )
     scheduler.start()
     atexit.register(scheduler.shutdown)
 
