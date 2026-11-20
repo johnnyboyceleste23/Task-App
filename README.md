@@ -75,12 +75,16 @@ The live application runs on AWS EC2. Gunicorn serves the Flask application, sys
 
 Updates are pushed to GitHub and pulled onto the server. Database model changes require a separate migration; `db.create_all()` does not update existing tables.
 
-## Email Notifications — In Progress
+### Email Reminders
 
-Users can save an email address and enable or disable reminder preferences. Actual email delivery is not implemented yet.
+Users can enable or disable daily email reminders from their dashboard.
+Reminders include their incomplete tasks due today. If no tasks are due,
+the email lets them know they are all caught up.
 
-When running locally with `python app.py`, the current background job prints potential reminders to the terminal. This job does not start through the deployed Gunicorn service.
-
+Emails are sent through Resend. A systemd timer on AWS EC2 runs the
+reminder script daily at 8 AM Eastern. The app records each user's last
+reminder date to avoid sending another reminder during normal repeat
+runs that day.
 ## Author
 
 Johnny Celeste
